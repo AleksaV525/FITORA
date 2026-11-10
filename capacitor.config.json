@@ -1,0 +1,7 @@
+{
+  "appId": "com.fitora.app",
+  "appName": "FITORA",
+  "webDir": "dist",
+  "backgroundColor": "#0D1013",
+  "ios": { "contentInset": "never" }
+}

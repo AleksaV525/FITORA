@@ -1,0 +1,403 @@
+<title>FITORA Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*__FONTS__*/
+/* Raspored: pregled figure uvek na vidiku (gore na telefonu, levo na širokom ekranu), ispod su klizači za dve poze, opis vežbe i gotov kod. */
+:root{
+  --bg:#0D1013; --bg-2:#12161A; --surface:#161B1F; --surface-2:#1E252A; --seg-on:#252D34;
+  --line:#232A30; --line-2:#323A42; --fg:#EEEDE8; --fg-2:#A9AFB5; --fg-3:#7C848C;
+  --accent:#C9F23C; --accent-text:#C9F23C; --accent-ink:#0C0E08;
+  --cta-bg:#C9F23C; --cta-fg:#0C0E08;
+  --bone:#D9D6CC; --bone-2:#BCB9AF; --joint:#0D1013; --fig-glow:#212A30;
+  --display:'Big Shoulders Display','Barlow Condensed','Arial Narrow',sans-serif;
+  --body:'Hanken Grotesk','Helvetica Neue',Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#F1F3EE; --bg-2:#E8EBE4; --surface:#FFFFFF; --surface-2:#F5F7F2; --seg-on:#FFFFFF;
+    --line:#E0E4DB; --line-2:#CBD1C5; --fg:#12150F; --fg-2:#454E46; --fg-3:#5E675F;
+    --accent:#7BAA00; --accent-text:#476600; --cta-bg:#12150F; --cta-fg:#C9F23C;
+    --bone:#343B35; --bone-2:#1D221E; --joint:#F1F3EE; --fig-glow:#E2E9D4; color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#F1F3EE; --bg-2:#E8EBE4; --surface:#FFFFFF; --surface-2:#F5F7F2; --seg-on:#FFFFFF;
+  --line:#E0E4DB; --line-2:#CBD1C5; --fg:#12150F; --fg-2:#454E46; --fg-3:#5E675F;
+  --accent:#7BAA00; --accent-text:#476600; --cta-bg:#12150F; --cta-fg:#C9F23C;
+  --bone:#343B35; --bone-2:#1D221E; --joint:#F1F3EE; --fig-glow:#E2E9D4; color-scheme:light;
+}
+/*__FIGCSS__*/
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font:400 15px/1.5 var(--body);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+h1,h2,h3,p{margin:0}
+:focus-visible{outline:2px solid var(--accent-text);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 48px;display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+.eyebrow{font:700 11px/1.3 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--fg-3)}
+.title{font:900 clamp(38px,9vw,54px)/.9 var(--display);text-transform:uppercase;margin-top:6px}
+.lead{color:var(--fg-2);margin-top:10px;max-width:60ch;font-size:14px}
+.stage{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:6px 10px}
+.fig{background:radial-gradient(120% 95% at 50% 100%,var(--fig-glow) 0%,var(--surface) 72%);border:1px solid var(--line);border-radius:22px;padding:8px 10px 0}
+.fig svg{display:block;width:100%;height:auto;max-height:min(36dvh,360px);margin:0 auto}
+.seg{display:flex;background:var(--bg-2);border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px}
+.seg button{flex:1;min-height:40px;padding:0 10px;border-radius:10px;font:600 14px/1.1 var(--body);color:var(--fg-3)}
+.seg button[aria-pressed=true]{background:var(--seg-on);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.stage .seg{margin-top:10px}
+.panel{display:grid;gap:16px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px;display:grid;gap:14px;min-width:0}
+.card h2{font:800 22px/1 var(--display);text-transform:uppercase;letter-spacing:.02em}
+.hint{color:var(--fg-2);font-size:13px}
+.grid2{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+label.f{display:grid;gap:6px;font:600 13px var(--body);color:var(--fg-2);min-width:0}
+input[type=text],input[type=number],select,textarea{width:100%;background:var(--bg-2);border:1px solid var(--line-2);border-radius:12px;padding:0 12px;min-height:44px;font-size:16px}
+textarea{padding:10px 12px;resize:vertical;line-height:1.4}
+.sl{display:grid;grid-template-columns:minmax(0,1fr) 72px;gap:6px 12px;align-items:center}
+.sl .nm{font:600 13px var(--body);color:var(--fg-2);grid-column:1/-1;display:flex;justify-content:space-between;gap:8px}
+.sl .nm i{font-style:normal;font-weight:500;color:var(--fg-3)}
+.sl input[type=range]{width:100%;accent-color:var(--accent);height:34px;margin:0}
+.sl input[type=number]{min-height:40px;padding:0 8px;text-align:right;font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:38px;padding:0 13px;border:1px solid var(--line-2);border-radius:19px;font:600 13px var(--body);color:var(--fg-2)}
+.chip[aria-pressed=true]{background:var(--cta-bg);border-color:var(--cta-bg);color:var(--cta-fg)}
+.chk{display:flex;align-items:center;gap:10px;font:500 14px var(--body);min-height:36px}
+.chk input{width:20px;height:20px;accent-color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border-radius:14px;background:var(--cta-bg);color:var(--cta-fg);font:800 17px/1 var(--display);letter-spacing:.1em;text-transform:uppercase}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line-2);font-size:15px}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+pre{margin:0;background:var(--bg-2);border:1px solid var(--line);border-radius:14px;padding:14px;font:500 12.5px/1.55 var(--mono);overflow:auto;max-height:420px;white-space:pre}
+.guide{display:grid;gap:8px;font-size:14px;color:var(--fg-2)}
+.guide b{color:var(--fg)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:12px 16px;border-radius:14px;font:600 14px var(--body);z-index:20;max-width:calc(100% - 32px)}
+@media (min-width:900px){
+  .wrap{grid-template-columns:minmax(0,430px) minmax(0,1fr);align-items:start;gap:28px}
+  .head{grid-column:1/-1}
+  .stage{top:16px;align-self:start}
+  .fig svg{max-height:none}
+}
+</style>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <radialGradient id="rg-glow"><stop offset="0" style="stop-color:var(--accent)" stop-opacity=".85"/><stop offset=".55" style="stop-color:var(--accent)" stop-opacity=".25"/><stop offset="1" style="stop-color:var(--accent)" stop-opacity="0"/></radialGradient>
+</defs></svg>
+
+<div class="wrap">
+  <header class="head">
+    <p class="eyebrow">FITORA alat</p>
+    <h1 class="title">Studio</h1>
+    <p class="lead">Složi dve poze vežbe (početak i kraj) klizačima. Aplikacija ih sama povezuje u pokret. Na dnu dobijaš gotov kod koji nalepiš u <b>data.js</b>.</p>
+  </header>
+
+  <section class="stage" aria-label="Pregled">
+    <div class="fig"><svg id="fig"></svg></div>
+    <div class="seg" id="pv" role="group" aria-label="Prikaz">
+      <button data-pv="a" aria-pressed="false">Početak</button>
+      <button data-pv="b" aria-pressed="false">Kraj</button>
+      <button data-pv="loop" aria-pressed="true">Pokret</button>
+    </div>
+  </section>
+
+  <div class="panel">
+    <div class="card">
+      <h2>Polazna tačka</h2>
+      <div class="grid2">
+        <label class="f">Učitaj postojeću ili počni novu<select id="src"></select></label>
+        <label class="f">Tip vežbe<select id="kind">
+          <option value="stand">Stojeći ili sa strane</option>
+          <option value="lying">Ležeći ili sedeći (oslonac kuk)</option>
+          <option value="front">Spreda (ruke i noge u stranu)</option>
+        </select></label>
+      </div>
+      <p class="hint" id="kind-hint"></p>
+    </div>
+
+    <div class="card">
+      <h2>Poze</h2>
+      <div class="seg" id="which" role="group" aria-label="Poza koju uređuješ">
+        <button data-w="a" aria-pressed="true">Poza A (početak)</button>
+        <button data-w="b" aria-pressed="false">Poza B (kraj)</button>
+      </div>
+      <div id="sliders" style="display:grid;gap:14px"></div>
+      <div class="btns">
+        <button class="btn ghost" id="a2b">Kopiraj A u B</button>
+        <button class="btn ghost" id="b2a">Kopiraj B u A</button>
+      </div>
+      <div style="display:grid;gap:2px">
+        <label class="chk"><input type="checkbox" id="x-hand"> Šaka ide ka zadatoj tački (za vežbe sa osloncem ili bučicom u određenom mestu)</label>
+        <label class="chk"><input type="checkbox" id="x-wrist"> Zglob šake se pomera (npr. pregib zgloba)</label>
+        <label class="chk" id="x-farleg-row"><input type="checkbox" id="x-farleg"> Druga noga se pomera nezavisno (makazice, bicikl)</label>
+      </div>
+      <div class="guide">
+        <p><b>Kako se čitaju uglovi:</b> 0° gleda udesno, 90° naniže, -90° naviše, 180° ulevo. Telo je okrenuto udesno.</p>
+        <p id="adv-note" hidden></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Opis vežbe</h2>
+      <div class="grid2">
+        <label class="f">Naziv<input type="text" id="m-name"></label>
+        <label class="f">Šifra (bez razmaka)<input type="text" id="m-id"></label>
+      </div>
+      <div><p class="hint" style="margin-bottom:8px">Glavni mišić</p><div class="chips" id="m-primary"></div></div>
+      <div><p class="hint" style="margin-bottom:8px">Pomoćni mišić</p><div class="chips" id="m-secondary"></div></div>
+      <div class="grid2">
+        <label class="f">Oprema<select id="m-equip"><option value="bez">Bez tegova</option><option value="teg">Bučice</option></select></label>
+        <label class="f">Nivo<select id="m-level"><option>Početnik</option><option>Srednji</option><option>Napredni</option></select></label>
+        <label class="f">Serije<input type="number" id="m-sets" min="1" max="10" inputmode="numeric"></label>
+        <label class="f">Ponavljanja ili sekunde<input type="number" id="m-reps" min="1" max="300" inputmode="numeric"></label>
+        <label class="f">Mera<select id="m-unit"><option value="pon">ponavljanja</option><option value="sek">sekunde</option></select></label>
+        <label class="f">Dodatak (npr. po nozi)<input type="text" id="m-per"></label>
+      </div>
+      <label class="f">Kratka uputa (jedna rečenica)<input type="text" id="m-cue"></label>
+      <label class="f">Koraci izvođenja (jedan red je jedan korak)<textarea id="m-steps" rows="5"></textarea></label>
+      <label class="f">Česte greške (jedan red je jedna greška)<textarea id="m-mistakes" rows="4"></textarea></label>
+      <div><p class="hint" style="margin-bottom:8px">Deo ruke ili noge koji svetli</p><div class="chips" id="m-hl"></div></div>
+      <div><p class="hint" style="margin-bottom:8px">Mesto gde svetli mišić</p><div class="chips" id="m-blob"></div></div>
+      <div style="display:grid;gap:2px">
+        <label class="chk" id="m-toe-row"><input type="checkbox" id="m-toe"> Stoji na prstima (sklekovi, skokovi)</label>
+        <label class="chk" id="m-flat-row"><input type="checkbox" id="m-flat"> Stopala ravno na podu (ležeći sa savijenim kolenima)</label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Gotov kod</h2>
+      <p class="hint">Nalepi ovo u <b>data.js</b>, u listu EXERCISES, i stavi zarez posle prethodne vežbe.</p>
+      <pre id="out" tabindex="0" aria-label="Kod vežbe"></pre>
+      <div class="btns"><button class="btn" id="copy">Kopiraj kod</button></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+/*__RIG__*/
+/*__DATA__*/
+(() => {
+  'use strict';
+  const $ = (s, r = document) => r.querySelector(s);
+  const clone = o => JSON.parse(JSON.stringify(o));
+  const VB = '-10 -55 280 250';
+
+  const DEF = {
+    stand: { ax: 112, shin: -90, thigh: -90, torso: -90, tilt: 0, upper: 84, fore: 86, lift: 0 },
+    lying: { hx: 135, hk: -6, ka: -6, torso: 180, tilt: 12, upper: 0, fore: 0 },
+    front: { stance: 15, abd: 5, abdF: 3, drop: 0, lean: 0 }
+  };
+  const SL = {
+    ax: ['Položaj stopala (x)', 20, 220, 1], hx: ['Položaj kuka (x)', 20, 220, 1],
+    shin: ['Potkolenica', -180, 180, 1], thigh: ['Butina', -180, 180, 1], torso: ['Trup', -270, 270, 1], tilt: ['Nagib glave', -90, 90, 1],
+    upper: ['Nadlaktica', -270, 270, 1], fore: ['Podlaktica', -270, 270, 1], lift: ['Telo iznad poda', 0, 60, 1],
+    hk: ['Kuk do kolena', -270, 270, 1], ka: ['Koleno do članka', -270, 270, 1],
+    fhk: ['Druga noga, kuk do kolena', -270, 270, 1], fka: ['Druga noga, koleno do članka', -270, 270, 1],
+    stance: ['Razmak stopala', 5, 45, 1], abd: ['Nadlaktica u stranu', -40, 100, 1], abdF: ['Podlaktica u stranu', -170, 100, 1],
+    drop: ['Spuštanje kukova', 0, 50, 1], lean: ['Nagib trupa napred', 0, 80, 1],
+    handx: ['Šaka, položaj x', 0, 260, 1], handy: ['Šaka, položaj y', 0, 200, 1], wrist: ['Zglob šake', -180, 180, 1]
+  };
+  const ORDER = ['ax', 'hx', 'lift', 'shin', 'thigh', 'hk', 'ka', 'fhk', 'fka', 'torso', 'tilt', 'upper', 'fore', 'hand', 'bend', 'wrist', 'stance', 'abd', 'abdF', 'drop', 'lean'];
+  const HL = { upper: 'Nadlaktica', fore: 'Podlaktica', thigh: 'Butina', shin: 'Potkolenica' };
+  const BLOB_SIDE = { shoulder: 'Rame', chest: 'Grudi', core: 'Stomak', back: 'Leđa', biceps: 'Biceps', triceps: 'Triceps', quad: 'Prednja loža', glute: 'Zadnjica', calf: 'List', fore: 'Podlaktica' };
+  const BLOB_FRONT = { delts: 'Ramena', quad: 'Prednja loža' };
+  const HINT = {
+    stand: 'Telo stoji na članku. Dobro za sklekove, čučnjeve, iskorake, pregibe i veslanje.',
+    lying: 'Oslonac je kuk na podu. Dobro za vežbe na leđima i sedeće vežbe. Trup, noge i ruke zadaješ uglovima.',
+    front: 'Gledaš figuru spreda. Dobro za bočno podizanje, razmah, sumo čučanj. Ruke i noge idu u stranu.'
+  };
+
+  let ex, kind = 'stand', which = 'a', pv = 'loop', fig = null, idTouched = false, extras = { hand: false, wrist: false, farleg: false };
+
+  const kindOf = e => e.view === 'front' ? 'front' : e.lying ? 'lying' : 'stand';
+  function newEx(k) {
+    return { id: 'nova-vezba', name: 'Nova vežba', primary: ['grudi'], secondary: [], equip: 'bez', level: 'Početnik', sets: 3, reps: 10, unit: 'pon', per: '', cue: '',
+      view: k === 'front' ? 'front' : 'side', lying: k === 'lying', hl: [], blob: [], a: clone(DEF[k]), b: clone(DEF[k]), steps: ['', ''], mistakes: [''] };
+  }
+  function load(e) {
+    ex = clone(e); kind = kindOf(ex); ex.per = ex.per || ''; idTouched = true;
+    extras = { hand: !!ex.a.hand, wrist: ex.a.wrist !== undefined, farleg: ex.a.fhk !== undefined };
+    which = 'a'; sync();
+  }
+  function setKind(k) {
+    const keep = { id: ex.id, name: ex.name, primary: ex.primary, secondary: ex.secondary, equip: ex.equip, level: ex.level, sets: ex.sets, reps: ex.reps, unit: ex.unit, per: ex.per, cue: ex.cue, steps: ex.steps, mistakes: ex.mistakes };
+    ex = Object.assign(newEx(k), keep); kind = k; extras = { hand: false, wrist: false, farleg: false }; sync();
+  }
+
+  /* ---------- klizači ---------- */
+  function keys() {
+    if (kind === 'front') return ['stance', 'abd', 'abdF', 'drop', 'lean'];
+    const k = kind === 'lying' ? ['hx', 'hk', 'ka', ...(extras.farleg ? ['fhk', 'fka'] : []), 'torso', 'tilt'] : ['ax', 'shin', 'thigh', 'torso', 'tilt', 'lift'];
+    if (extras.hand) k.push('handx', 'handy'); else k.push('upper', 'fore');
+    if (extras.wrist) k.push('wrist');
+    return k;
+  }
+  const getV = (p, k) => k === 'handx' ? p.hand[0] : k === 'handy' ? p.hand[1] : p[k];
+  function setV(p, k, v) { if (k === 'handx') p.hand[0] = v; else if (k === 'handy') p.hand[1] = v; else p[k] = v; }
+
+  function renderSliders() {
+    const p = ex[which];
+    $('#sliders').innerHTML = keys().map(k => {
+      const [lab, mn, mx, st] = SL[k], v = getV(p, k);
+      return `<div class="sl"><div class="nm"><span>${lab}</span><i>${mn} do ${mx}</i></div>
+        <input type="range" data-k="${k}" min="${mn}" max="${mx}" step="${st}" value="${v}" aria-label="${lab}">
+        <input type="number" data-n="${k}" min="${mn}" max="${mx}" step="${st}" value="${v}" aria-label="${lab}, vrednost"></div>`;
+    }).join('') + (extras.hand ? `<label class="f">Na koju stranu se savija lakat<select id="bend"><option value="-1">Jedna strana</option><option value="1">Druga strana</option></select></label>` : '');
+    const bs = $('#bend'); if (bs) bs.value = String(ex.a.bend ?? -1);
+    $('#which').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.w === which));
+  }
+
+  function setExtra(name, on) {
+    extras[name] = on;
+    for (const w of ['a', 'b']) {
+      const p = ex[w];
+      if (name === 'hand') {
+        if (on) { p.hand = p.hand || [140, 110]; p.bend = ex.a.bend ?? -1; delete p.upper; delete p.fore; }
+        else { delete p.hand; delete p.bend; p.upper = p.upper ?? DEF.stand.upper; p.fore = p.fore ?? DEF.stand.fore; }
+      } else if (name === 'wrist') {
+        if (on) p.wrist = w === 'a' ? 70 : -45; else delete p.wrist;
+      } else if (name === 'farleg') {
+        if (on) { p.fhk = p.hk; p.fka = p.ka; } else { delete p.fhk; delete p.fka; }
+      }
+    }
+    renderSliders(); refresh();
+  }
+
+  /* ---------- opis ---------- */
+  function chips(el, map, list, onToggle) {
+    el.innerHTML = Object.entries(map).map(([k, v]) => `<button class="chip" data-v="${k}" aria-pressed="${list.includes(k)}">${v.label || v}</button>`).join('');
+    el.onclick = e => {
+      const b = e.target.closest('.chip'); if (!b) return;
+      const i = list.indexOf(b.dataset.v); if (i >= 0) list.splice(i, 1); else list.push(b.dataset.v);
+      b.setAttribute('aria-pressed', i < 0); onToggle();
+    };
+  }
+  function renderMeta() {
+    $('#m-name').value = ex.name; $('#m-id').value = ex.id;
+    chips($('#m-primary'), MUSCLES, ex.primary, refresh);
+    chips($('#m-secondary'), MUSCLES, ex.secondary, refresh);
+    chips($('#m-hl'), HL, ex.hl, refresh);
+    chips($('#m-blob'), kind === 'front' ? BLOB_FRONT : BLOB_SIDE, ex.blob, refresh);
+    $('#m-equip').value = ex.equip; $('#m-level').value = ex.level; $('#m-sets').value = ex.sets; $('#m-reps').value = ex.reps;
+    $('#m-unit').value = ex.unit; $('#m-per').value = ex.per; $('#m-cue').value = ex.cue;
+    $('#m-steps').value = ex.steps.join('\n'); $('#m-mistakes').value = ex.mistakes.join('\n');
+    $('#m-toe').checked = !!ex.toe; $('#m-flat').checked = !!ex.flatFeet;
+    $('#m-toe-row').hidden = kind !== 'stand'; $('#m-flat-row').hidden = kind !== 'lying';
+    $('#x-hand').checked = extras.hand; $('#x-wrist').checked = extras.wrist; $('#x-farleg').checked = extras.farleg;
+    $('#x-hand').parentElement.hidden = $('#x-wrist').parentElement.hidden = kind === 'front';
+    $('#x-farleg-row').hidden = kind !== 'lying';
+    $('#kind').value = kind; $('#kind-hint').textContent = HINT[kind];
+    const known = new Set([...ORDER, 'upper', 'fore']);
+    const extra = [...new Set([...Object.keys(ex.a), ...Object.keys(ex.b)])].filter(k => !known.has(k));
+    const note = $('#adv-note');
+    note.hidden = !extra.length;
+    note.textContent = extra.length ? `Ova vežba ima i parametre koji se ovde ne menjaju (${extra.join(', ')}). Ostaju u kodu kakvi jesu.` : '';
+  }
+
+  /* ---------- pregled i kod ---------- */
+  function drawFig() {
+    if (fig) fig.destroy();
+    fig = Rig.make($('#fig'), ex, { viewBox: VB, static: pv !== 'loop' });
+    if (pv !== 'loop') fig.draw(pv === 'b' ? 1 : 0);
+    $('#pv').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.pv === pv));
+  }
+  const q = s => "'" + String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'";
+  const arr = a => '[' + a.map(q).join(', ') + ']';
+  const num = v => String(+(+v).toFixed(1));
+  function fmtPose(p) {
+    const order = [...ORDER, ...Object.keys(p).filter(k => !ORDER.includes(k))];
+    const parts = [];
+    for (const k of order) {
+      if (p[k] === undefined) continue;
+      const v = p[k];
+      parts.push(`${k}: ${Array.isArray(v) ? '[' + v.map(num).join(', ') + ']' : typeof v === 'number' ? num(v) : typeof v === 'boolean' ? v : q(v)}`);
+    }
+    return `{ ${parts.join(', ')} }`;
+  }
+  function toCode() {
+    const lines = ['{'];
+    lines.push(`    id: ${q(ex.id)}, name: ${q(ex.name)},`);
+    lines.push(`    primary: ${arr(ex.primary)}, secondary: ${arr(ex.secondary)}, equip: ${q(ex.equip)}, level: ${q(ex.level)},`);
+    lines.push(`    sets: ${ex.sets}, reps: ${ex.reps}, unit: ${q(ex.unit)}${ex.per ? ', per: ' + q(ex.per) : ''}${ex.toe ? ', toe: true' : ''},`);
+    lines.push(`    cue: ${q(ex.cue)},`);
+    lines.push(`    view: ${q(ex.view)}${ex.lying ? ', lying: true' : ''}${ex.flatFeet ? ', flatFeet: true' : ''}, hl: ${arr(ex.hl)}, blob: ${arr(ex.blob)},`);
+    if (ex.props && ex.props.length) lines.push(`    props: [${ex.props.map(p => '{ ' + Object.entries(p).map(([k, v]) => k + ': ' + v).join(', ') + ' }').join(', ')}],`);
+    lines.push(`    a: ${fmtPose(ex.a)},`);
+    lines.push(`    b: ${fmtPose(ex.b)},`);
+    const st = ex.steps.map(s => s.trim()).filter(Boolean), mi = ex.mistakes.map(s => s.trim()).filter(Boolean);
+    lines.push(`    steps: [\n      ${st.map(q).join(',\n      ')}\n    ],`);
+    lines.push(`    mistakes: [\n      ${mi.map(q).join(',\n      ')}\n    ]`);
+    lines.push('  },');
+    return '  ' + lines.join('\n');
+  }
+  function refresh() { drawFig(); $('#out').textContent = toCode(); }
+  function sync() { renderMeta(); renderSliders(); refresh(); }
+
+  /* ---------- događaji ---------- */
+  function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { t.hidden = true; }, 2600); }
+  const slug = s => s.toLowerCase().replace(/č|ć/g, 'c').replace(/š/g, 's').replace(/ž/g, 'z').replace(/đ/g, 'dj').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'vezba';
+
+  document.addEventListener('input', e => {
+    const t = e.target;
+    if (t.dataset.k || t.dataset.n) {
+      const k = t.dataset.k || t.dataset.n, v = parseFloat(t.value);
+      if (Number.isNaN(v)) return;
+      setV(ex[which], k, v);
+      const twin = $(t.dataset.k ? `[data-n="${k}"]` : `[data-k="${k}"]`); if (twin) twin.value = v;
+      if (pv === 'loop') pv = which;
+      refresh(); return;
+    }
+    switch (t.id) {
+      case 'm-name': ex.name = t.value; if (!idTouched) { ex.id = slug(ex.name); $('#m-id').value = ex.id; } break;
+      case 'm-id': ex.id = slug(t.value); idTouched = true; break;
+      case 'm-sets': ex.sets = Math.max(1, Math.min(10, +t.value || 1)); break;
+      case 'm-reps': ex.reps = Math.max(1, Math.min(300, +t.value || 1)); break;
+      case 'm-per': ex.per = t.value; break;
+      case 'm-cue': ex.cue = t.value; break;
+      case 'm-steps': ex.steps = t.value.split('\n'); break;
+      case 'm-mistakes': ex.mistakes = t.value.split('\n'); break;
+      default: return;
+    }
+    $('#out').textContent = toCode();
+  });
+  document.addEventListener('change', e => {
+    const t = e.target;
+    switch (t.id) {
+      case 'src': {
+        if (t.value.startsWith('new-')) { idTouched = false; ex = newEx(t.value.slice(4)); kind = t.value.slice(4); extras = { hand: false, wrist: false, farleg: false }; which = 'a'; sync(); }
+        else load(EXERCISES.find(x => x.id === t.value));
+        break;
+      }
+      case 'kind': setKind(t.value); break;
+      case 'm-equip': ex.equip = t.value; refresh(); break;
+      case 'm-level': ex.level = t.value; refresh(); break;
+      case 'm-unit': ex.unit = t.value; refresh(); break;
+      case 'm-toe': ex.toe = t.checked || undefined; refresh(); break;
+      case 'm-flat': ex.flatFeet = t.checked || undefined; refresh(); break;
+      case 'x-hand': setExtra('hand', t.checked); break;
+      case 'x-wrist': setExtra('wrist', t.checked); break;
+      case 'x-farleg': setExtra('farleg', t.checked); break;
+      case 'bend': ex.a.bend = ex.b.bend = +t.value; refresh(); break;
+    }
+  });
+  document.addEventListener('click', e => {
+    const t = e.target;
+    const w = t.closest('[data-w]'); if (w) { which = w.dataset.w; if (pv !== 'loop') pv = which; renderSliders(); drawFig(); return; }
+    const p = t.closest('[data-pv]'); if (p) { pv = p.dataset.pv; drawFig(); return; }
+    if (t.closest('#a2b')) { ex.b = clone(ex.a); renderSliders(); refresh(); toast('Poza A je kopirana u B'); return; }
+    if (t.closest('#b2a')) { ex.a = clone(ex.b); renderSliders(); refresh(); toast('Poza B je kopirana u A'); return; }
+    if (t.closest('#copy')) {
+      const text = $('#out').textContent;
+      navigator.clipboard.writeText(text).then(() => toast('Kod je kopiran')).catch(() => {
+        const r = document.createRange(); r.selectNodeContents($('#out')); const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+        toast('Kod je označen, kopiraj ga ručno');
+      });
+    }
+  });
+
+  /* ---------- start ---------- */
+  $('#src').innerHTML = '<option value="new-stand">Nova, stojeća ili sa strane</option><option value="new-lying">Nova, ležeća ili sedeća</option><option value="new-front">Nova, spreda</option>' +
+    '<optgroup label="Postojeće vežbe">' + EXERCISES.map(e => `<option value="${e.id}">${e.name}</option>`).join('') + '</optgroup>';
+  $('#src').value = 'noge-lezeci';
+  load(EXERCISES.find(x => x.id === 'noge-lezeci'));
+})();
+</script>
